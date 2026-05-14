@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   archiva:
     image: xetusoss/archiva:latest
@@ -11,6 +13,39 @@ services:
       - JAVA_OPTS=-Xms1g -Xmx2g
 
     volumes:
-      - /opt/archiva/data:/archiva-data
-      - /opt/archiva/logs:/archiva-logs
-      - /opt/archiva/conf:/archiva-conf
+      - archiva-data:/archiva-data
+      - archiva-logs:/archiva-logs
+      - archiva-conf:/archiva-conf
+
+    # Resource limits for stability
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 3G
+        reservations:
+          cpus: '1'
+          memory: 2G
+
+    # Health check to monitor container status
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  archiva-data:
+    driver: local
+  archiva-logs:
+    driver: local
+  archiva-conf:
+    driver: local

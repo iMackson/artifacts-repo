@@ -1,46 +1,39 @@
-version: '3.8'
+version: '2.4'
 
 services:
   archiva:
-    image: xetusoss/archiva:latest
-    container_name: archiva
+    image: xetusoss/archiva:2.3.0
     restart: unless-stopped
 
     ports:
       - "127.0.0.1:8080:8080"
-    
+
     environment:
-      - JAVA_OPTS=-Xms1g -Xmx2g
+      - JAVA_OPTS=-Xms512m -Xmx1024m
 
     volumes:
       - archiva-data:/archiva-data
       - archiva-logs:/archiva-logs
       - archiva-conf:/archiva-conf
 
-    # Resource limits for stability
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 3G
-        reservations:
-          cpus: '1'
-          memory: 2G
+    cpus: 0.75
+    mem_limit: 1536m
 
-    # Health check to monitor container status
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 60s
 
-    # Logging configuration
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
+
+    networks:
+      - archiva-net
 
 volumes:
   archiva-data:
@@ -49,3 +42,7 @@ volumes:
     driver: local
   archiva-conf:
     driver: local
+
+networks:
+  archiva-net:
+    driver: bridge

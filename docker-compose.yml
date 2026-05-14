@@ -2,7 +2,7 @@ version: '2.4'
 
 services:
   archiva:
-    image: xetusoss/archiva:2.2.5
+    image: xetusoss/archiva:latest
     restart: unless-stopped
 
     ports:
